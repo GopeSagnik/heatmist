@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Heat Mist | Coming Soon</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -14,7 +14,6 @@
         }
 
         body {
-            /* Deep dark blue/teal gradient */
             background: linear-gradient(135deg, #0a1128 0%, #162447 100%);
             color: #e0e0e0;
             min-height: 100vh;
@@ -22,9 +21,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow: hidden; /* Prevents scrolling when mist goes off-screen */
             text-align: center;
             position: relative;
+            touch-action: none; /* Prevents mobile swipe-to-refresh glitching */
         }
 
         /* Full Width Pipe System */
@@ -34,7 +34,7 @@
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 900px; /* Constrains width on ultrawide screens */
+            max-width: 900px;
             z-index: 10;
         }
 
@@ -79,14 +79,14 @@
 
         .mist-container {
             position: absolute;
-            top: 23px; /* Starts right below the tip */
+            top: 23px;
             width: 200px;
             height: 600px;
             overflow: visible;
             pointer-events: none;
         }
 
-        /* Mist Particles */
+        /* Mist Particles Base */
         .particle {
             position: absolute;
             top: 0;
@@ -95,10 +95,11 @@
             border-radius: 50%;
             filter: blur(8px);
             pointer-events: none;
-            transform: translateX(-50%);
+            /* Remove CSS animations, handled by JS now */
+            will-change: transform, opacity; /* Warns the mobile browser to optimize this element */
         }
 
-        /* Main Content Styling - Dark Glassmorphism */
+        /* Main Content Styling */
         .content {
             z-index: 20;
             background: rgba(15, 25, 45, 0.6);
@@ -109,7 +110,7 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             max-width: 600px;
             width: 90%;
-            margin-top: 80px; /* Adjusted to account for the pipe */
+            margin-top: 80px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -137,7 +138,6 @@
             margin-bottom: 30px;
         }
 
-        /* New Prominent Coming Soon Styling */
         .coming-soon {
             font-size: 2.5rem;
             font-weight: 800;
@@ -149,7 +149,6 @@
             animation: pulse 2s infinite ease-in-out;
         }
 
-        /* Pulsing effect for the coming soon text */
         @keyframes pulse {
             0%, 100% {
                 transform: scale(1);
@@ -161,10 +160,11 @@
             }
         }
 
-        /* Responsive */
+        /* Responsive adjustments */
         @media (max-width: 600px) {
             .content {
                 padding: 30px;
+                margin-top: 120px; /* Push content down slightly on phones to avoid mist overlap blocking text */
             }
             .logo {
                 font-size: 2.2rem;
@@ -175,7 +175,6 @@
             .coming-soon {
                 font-size: 2rem;
             }
-            /* Adjust nozzle spacing for smaller screens */
             .nozzles-wrapper {
                 padding: 0 2%;
             }
@@ -184,25 +183,19 @@
 </head>
 <body>
 
-    <!-- Multi-Nozzle Mist System -->
     <div class="pipe-system">
         <div class="pipe"></div>
         <div class="nozzles-wrapper">
-            <!-- Nozzle 1 (Left) -->
             <div class="nozzle-assembly">
                 <div class="nozzle-top"></div>
                 <div class="nozzle-tip"></div>
                 <div class="mist-container"></div>
             </div>
-            
-            <!-- Nozzle 2 (Center) -->
             <div class="nozzle-assembly">
                 <div class="nozzle-top"></div>
                 <div class="nozzle-tip"></div>
                 <div class="mist-container"></div>
             </div>
-
-            <!-- Nozzle 3 (Right) -->
             <div class="nozzle-assembly">
                 <div class="nozzle-top"></div>
                 <div class="nozzle-tip"></div>
@@ -211,75 +204,61 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="content">
         <div class="logo">Heat Mist</div>
         <div class="tagline">Cooling Kolkata, One Drop at a Time.</div>
         <p class="description">
             Beat the sweltering heat with our refreshing mist sprayers! We are bringing instant relaxation and cooling to bus stands and roads across the Kolkata region. Our systems are designed to drop the temperature and bring a smile to your face.
         </p>
-        
-        <!-- Updated Coming Soon Banner -->
         <div class="coming-soon">
             Coming Soon!
         </div>
     </div>
 
-    <!-- Script for Generating Mist Animation -->
     <script>
-        // Select all mist containers (one for each nozzle)
         const mistContainers = document.querySelectorAll('.mist-container');
 
         function createMistParticle(container) {
             const particle = document.createElement('div');
             particle.classList.add('particle');
             
-            // Randomize particle properties for a natural spray effect
+            // Randomize properties
             const size = Math.random() * 15 + 10; 
-            const spreadX = (Math.random() - 0.5) * 140; // Slightly wider horizontal drift
-            const duration = Math.random() * 2.5 + 2; 
+            const spreadX = (Math.random() - 0.5) * 140; 
+            const duration = (Math.random() * 2.5 + 2) * 1000; // Converted to milliseconds
+            const finalScale = Math.random() * 4 + 3;
             
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             
-            // Generate a random keyframe animation for this specific particle
-            const animName = `spray-${Math.random().toString(36).substr(2, 9)}`;
-            
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes ${animName} {
-                    0% {
-                        transform: translate(-50%, 0) scale(1);
-                        opacity: 0.7;
-                    }
-                    40% {
-                        opacity: 0.4;
-                    }
-                    100% {
-                        transform: translate(calc(-50% + ${spreadX}px), 500px) scale(${Math.random() * 4 + 3});
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            particle.style.animation = `${animName} ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
-            
             container.appendChild(particle);
-            
-            // Clean up DOM and styles after animation finishes
-            setTimeout(() => {
+
+            // Use the Web Animations API for smooth, hardware-accelerated mobile performance
+            const animation = particle.animate([
+                { transform: 'translate(-50%, 0) scale(1)', opacity: 0.7, offset: 0 },
+                { opacity: 0.4, offset: 0.4 },
+                { transform: `translate(calc(-50% + ${spreadX}px), 500px) scale(${finalScale})`, opacity: 0, offset: 1 }
+            ], {
+                duration: duration,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                fill: 'forwards'
+            });
+
+            // Clean up the DOM element smoothly when the animation finishes
+            animation.onfinish = () => {
                 particle.remove();
-                style.remove();
-            }, duration * 1000);
+            };
         }
 
-        // Generate particles continuously for ALL nozzles
+        // Reduced spawn rate slightly (from 45ms to 60ms) to ensure butter-smooth frame rates on older phones
         setInterval(() => {
-            mistContainers.forEach(container => {
-                createMistParticle(container);
-            });
-        }, 45); // Set to 45ms to ensure smooth performance with 3 active nozzles
+            // Check if page is hidden to save battery/processor when user switches tabs
+            if (!document.hidden) { 
+                mistContainers.forEach(container => {
+                    createMistParticle(container);
+                });
+            }
+        }, 60); 
     </script>
 </body>
 </html>
