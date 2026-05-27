@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heat Mist — Cool the City</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cyan: #00e5d4;
+    --cyan-dim: #00b5a8;
+    --cyan-glow: rgba(0,229,212,0.18);
+    --bg: #080c10;
+    --bg2: #0d1318;
+    --bg3: #111820;
+    --text: #e8f4f2;
+    --muted: #7a9fa0;
+    --border: rgba(0,229,212,0.12);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: rgba(8,12,16,0.7);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--cyan);
+    letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--text); }
+  .nav-cta {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--cyan);
+    border: none;
+    border-radius: 100px;
+    padding: 0.45rem 1.1rem;
+    cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 6rem 1.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Mist canvas */
+  #mist-canvas {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Radial bg glow */
+  #hero::before {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw; height: 60vw;
+    background: radial-gradient(ellipse, rgba(0,229,212,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 520px; }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.3rem 0.9rem;
+    margin-bottom: 1.5rem;
+    background: rgba(0,229,212,0.06);
+  }
+
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(2.6rem, 9vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 1.2rem;
+  }
+  .hero-title .accent { color: var(--cyan); }
+
+  .hero-sub {
+    font-size: clamp(0.95rem, 3vw, 1.1rem);
+    color: var(--muted);
+    max-width: 380px;
+    margin: 0 auto 2.2rem;
+    font-weight: 300;
+  }
+
+  .hero-btns { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-primary {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--bg);
+    background: var(--cyan);
+    border: none; border-radius: 100px;
+    padding: 0.8rem 1.8rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 28px rgba(0,229,212,0.25);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,229,212,0.4); }
+
+  .btn-ghost {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--cyan);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.8rem 1.8rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-ghost:hover { background: var(--cyan-glow); border-color: var(--cyan-dim); }
+
+  /* Nozzle animation */
+  .nozzle-wrap {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    pointer-events: none;
+  }
+  .nozzle-body {
+    width: 56px; height: 90px;
+    background: linear-gradient(160deg, #1c2c30 0%, #0d191e 100%);
+    border: 1px solid rgba(0,229,212,0.25);
+    border-radius: 8px 8px 4px 4px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,229,212,0.08);
+  }
+  .nozzle-tip {
+    width: 14px; height: 22px;
+    background: linear-gradient(180deg, #00e5d4 0%, #00b5a8 100%);
+    border-radius: 0 0 6px 6px;
+    margin: -2px auto 0;
+    box-shadow: 0 4px 18px rgba(0,229,212,0.5);
+  }
+  .nozzle-holes {
+    display: flex; gap: 4px; justify-content: center;
+    position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  }
+  .nozzle-hole {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    animation: pulse-hole 2s ease-in-out infinite;
+  }
+  .nozzle-hole:nth-child(2) { animation-delay: 0.3s; }
+  .nozzle-hole:nth-child(3) { animation-delay: 0.6s; }
+  @keyframes pulse-hole { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+
+  /* Scroll cue */
+  .scroll-cue {
+    position: absolute; bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--muted); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .scroll-arrow {
+    width: 20px; height: 20px;
+    border-right: 1.5px solid var(--muted);
+    border-bottom: 1.5px solid var(--muted);
+    transform: rotate(45deg);
+    animation: bounce-down 1.6s ease-in-out infinite;
+  }
+  @keyframes bounce-down { 0%,100%{transform:rotate(45deg) translateY(0);} 50%{transform:rotate(45deg) translateY(5px);} }
+
+  /* ── SECTIONS SHARED ── */
+  section { padding: 5rem 1.5rem; }
+
+  .section-label {
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--cyan);
+    margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.025em; color: #fff;
+    margin-bottom: 1rem;
+  }
+  .section-title .accent { color: var(--cyan); }
+  .section-body {
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 540px;
+    font-size: 1.05rem;
+  }
+
+  /* ── MOTTO ── */
+  #motto {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .motto-quote {
+    font-family: var(--font-head);
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    font-weight: 700; line-height: 1.3;
+    color: #fff; max-width: 600px;
+    margin: 0 auto 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  .motto-sub {
+    color: var(--muted); font-size: 1rem; font-weight: 300;
+    max-width: 440px; margin: 0 auto 2rem;
+  }
+  .motto-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1rem; max-width: 480px; margin: 2.5rem auto 0;
+  }
+  .stat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 0.8rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 1.9rem; font-weight: 800;
+    color: var(--cyan); line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 400; line-height: 1.3; }
+
+  /* ── WHY SECTION ── */
+  #why { background: var(--bg); }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    max-width: 640px;
+  }
+
+  @media (min-width: 600px) {
+    .why-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .why-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.6rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .why-card:hover { border-color: var(--cyan-dim); transform: translateY(-3px); }
+  .why-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    opacity: 0.6;
+  }
+  .why-icon {
+    font-size: 1.8rem; margin-bottom: 0.8rem;
+    filter: drop-shadow(0 0 8px rgba(0,229,212,0.4));
+  }
+  .why-title {
+    font-family: var(--font-head);
+    font-weight: 700; font-size: 1.05rem;
+    color: #fff; margin-bottom: 0.5rem;
+  }
+  .why-text { font-size: 0.88rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+  .why-highlight {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 1rem;
+    background: linear-gradient(135deg, rgba(0,229,212,0.07) 0%, rgba(0,229,212,0.02) 100%);
+    border-color: rgba(0,229,212,0.25);
+  }
+  .why-highlight .why-icon { font-size: 2.4rem; flex-shrink: 0; }
+
+  /* ── FEEDBACK ── */
+  #feedback {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+  }
+
+  .form-wrap {
+    max-width: 520px;
+    margin-top: 2.5rem;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+  .field {
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .field label {
+    font-size: 0.78rem; font-weight: 500;
+    color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .field input,
+  .field textarea,
+  .field select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    appearance: none;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    border-color: var(--cyan-dim);
+    box-shadow: 0 0 0 3px rgba(0,229,212,0.1);
+  }
+  .field textarea { resize: vertical; min-height: 110px; }
+  .field select option { background: var(--bg3); }
+
+  .rating-row {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+  }
+  .rating-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--muted);
+    font-family: var(--font-head);
+    font-weight: 700; font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rating-btn:hover, .rating-btn.active {
+    background: var(--cyan);
+    color: var(--bg);
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0,229,212,0.3);
+  }
+
+  .submit-btn {
+    font-family: var(--font-head);
+    font-weight: 700; font-size: 1rem;
+    color: var(--bg);
+    background: var(--cyan);
+    border: none; border-radius: 100px;
+    padding: 0.9rem 2rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 0 28px rgba(0,229,212,0.2);
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,229,212,0.4); }
+  .submit-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  .form-success {
+    display: none;
+    background: rgba(0,229,212,0.08);
+    border: 1px solid rgba(0,229,212,0.25);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .form-success .check { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .form-success h3 {
+    font-family: var(--font-head); font-weight: 700;
+    color: var(--cyan); margin-bottom: 0.4rem;
+  }
+  .form-success p { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: var(--font-head);
+    font-weight: 800; font-size: 1.4rem;
+    color: var(--cyan); letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .footer-logo span { color: var(--text); }
+  .footer-tagline { font-size: 0.85rem; color: var(--muted); margin-bottom: 2rem; font-weight: 300; }
+
+  .footer-links {
+    display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .footer-links a {
+    font-size: 0.85rem; color: var(--muted); text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 400;
+  }
+  .footer-links a:hover { color: var(--cyan); }
+
+  .footer-divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 0 0 1.5rem;
+  }
+  .footer-bottom {
+    font-size: 0.75rem; color: var(--muted);
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem;
+  }
+  .footer-bottom a { color: var(--cyan); text-decoration: none; }
+
+  .location-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.72rem; font-weight: 500;
+    color: var(--cyan);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 1.5rem;
+    background: rgba(0,229,212,0.04);
+  }
+  .location-pill::before { content: '📍'; font-size: 0.75em; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Heat<span>Mist</span></div>
+  <a href="#feedback" class="nav-cta">Give Feedback</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="mist-canvas"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">🌬️ Kolkata's Cooling Revolution</div>
+    <h1 class="hero-title">
+      Beat the<br><span class="accent">Urban Heat</span><br>Breathe Easy
+    </h1>
+    <p class="hero-sub">Smart mist sprayers at Kolkata's bus stands and roads — turning scorching streets into cool, breathable spaces.</p>
+    <div class="hero-btns">
+      <a href="#why" class="btn-primary">Why It Matters</a>
+      <a href="#feedback" class="btn-ghost">Share Feedback</a>
+    </div>
+  </div>
+
+  <!-- Nozzle -->
+  <!-- <div class="nozzle-wrap">
+    <div class="nozzle-body">
+      <div class="nozzle-holes">
+        <div class="nozzle-hole"></div>
+        <div class="nozzle-hole"></div>
+        <div class="nozzle-hole"></div>
+      </div>
+    </div>
+    <div class="nozzle-tip"></div>
+  </div> -->
+
+  <!-- <div class="scroll-cue">
+    Scroll
+    <div class="scroll-arrow"></div>
+  </div> -->
+</section>
+
+<!-- MOTTO -->
+<section id="motto">
+  <div class="section-label">Our Motto</div>
+  <p class="motto-quote">"Cool the city.<br>Clear the air.<br>One mist at a time."</p>
+  <p class="motto-sub">We believe public comfort is a right, not a luxury. Heat Mist is built for the people who wait — on streets, at bus stops, in the city's heat.</p>
+
+  <div class="location-pill">Currently serving Kolkata, West Bengal</div>
+<!-- 
+  <div class="motto-stats">
+    <div class="stat-card">
+      <div class="stat-num">8°C</div>
+      <div class="stat-label">Local temp drop</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">60%</div>
+      <div class="stat-label">Dust reduction</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">0₹</div>
+      <div class="stat-label">Cost to public</div>
+    </div>
+  </div> -->
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="section-label">Why Heat Mist</div>
+  <h2 class="section-title">Dual impact — <span class="accent">Heat & Pollution</span></h2>
+  <p class="section-body">Kolkata summers are brutal. But rising temperature isn't the only threat — particulate matter and dust make every breath a burden. Mist tackles both.</p>
+
+  <div class="why-grid">
+    <div class="why-card why-highlight">
+      <div class="why-icon">🌡️</div>
+      <div>
+        <div class="why-title">Instant Cooling Effect</div>
+        <p class="why-text">Fine water droplets evaporate rapidly, absorbing ambient heat and lowering the surrounding air temperature by 6–10°C in under 2 minutes. Tested in tropical conditions similar to Kolkata's climate.</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">💨</div>
+      <div class="why-title">Traps Airborne Dust</div>
+      <p class="why-text">Mist particles bind to PM2.5 and PM10 pollutants, pulling them to ground level — up to 60% reduction in dust near sprayer zones.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🚌</div>
+      <div class="why-title">Bus Stand First</div>
+      <p class="why-text">Bus stand commuters bear the worst of Kolkata's heat. Our first installations target high-footfall stops, where even a few minutes of relief matters most.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">💧</div>
+      <div class="why-title">Water Efficient</div>
+      <p class="why-text">Ultra-fine nozzles use a fraction of water compared to traditional sprinklers — optimised for maximum cooling per litre.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🌱</div>
+      <div class="why-title">Zero Carbon Footprint</div>
+      <p class="why-text">Our systems run on low-power motors and can be paired with solar. Misting doesn't burn fuel — it reverses the effect of those that do.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEEDBACK -->
+<section id="feedback">
+  <div class="section-label">Your Voice Matters</div>
+  <h2 class="section-title">Share Your <span class="accent">Experience</span></h2>
+  <p class="section-body">Whether you've felt our mist or simply believe Kolkata needs it — we want to hear from you. Your feedback shapes where we expand next.</p>
+
+  <div class="form-wrap">
+    <div id="form-success" class="form-success">
+      <div class="check">💧</div>
+      <h3>Thank you!</h3>
+      <p>Your feedback has reached the Heat Mist team. We'll keep cooling the city, one mist at a time.</p>
+    </div>
+
+    <form id="feedback-form" action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_KEY_HERE">
+      <input type="hidden" name="subject" value="Heat Mist Feedback — heatmist.in">
+      <input type="hidden" name="from_name" value="Heat Mist Website">
+      <input type="checkbox" name="botcheck" style="display:none">
+
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="form-row">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" name="name" placeholder="Your name" required>
+          </div>
+          <div class="field">
+            <label>Phone / Email</label>
+            <input type="text" name="contact" placeholder="Optional">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>How did you encounter us?</label>
+          <select name="encounter">
+            <option value="" disabled selected>Select one</option>
+            <option>Saw a mist sprayer at a bus stand</option>
+            <option>Saw it on the road</option>
+            <option>Someone told me about it</option>
+            <option>Social media / news</option>
+            <option>Haven't seen it yet</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Rate the cooling effect (1–5)</label>
+          <div class="rating-row" id="rating-btns">
+            <button type="button" class="rating-btn" data-val="1">1</button>
+            <button type="button" class="rating-btn" data-val="2">2</button>
+            <button type="button" class="rating-btn" data-val="3">3</button>
+            <button type="button" class="rating-btn" data-val="4">4</button>
+            <button type="button" class="rating-btn" data-val="5">5</button>
+          </div>
+          <input type="hidden" name="rating" id="rating-val">
+        </div>
+
+        <div class="field">
+          <label>Suggest a location</label>
+          <input type="text" name="location_suggestion" placeholder="e.g. Esplanade Bus Stand, Howrah Station...">
+        </div>
+
+        <div class="field">
+          <label>Your message</label>
+          <textarea name="message" placeholder="Any thoughts, complaints, or ideas for Heat Mist..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">Send Feedback →</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Heat<span>Mist</span></div>
+  <p class="footer-tagline">Cooling Kolkata, one street at a time.</p>
+  <div class="location-pill">Kolkata, West Bengal 🇮🇳</div>
+  <div class="footer-links">
+    <a href="#hero">Home</a>
+    <a href="#motto">Motto</a>
+    <a href="#why">Why Us</a>
+    <a href="#feedback">Feedback</a>
+    <a href="mailto:hello@heatmist.in">hello@heatmist.in</a>
+  </div>
+  <hr class="footer-divider">
+  <div class="footer-bottom">
+    <span>© 2025 Heat Mist. All rights reserved.</span>
+    <span>·</span>
+    <span><a href="#">heatmist.in</a></span>
+  </div>
+</footer>
+
+<script>
+/* ── ATMOSPHERIC MIST — full-screen drifting clouds ── */
+const canvas = document.getElementById('mist-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, clouds = [], droplets = [];
+
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+}
+window.addEventListener('resize', () => { resize(); initClouds(); });
+resize();
+
+/* Large slow drifting mist blobs */
+class MistCloud {
+  constructor(init) {
+    this.spawn(init);
+  }
+  spawn(init) {
+    this.x = Math.random() * W;
+    this.y = init ? Math.random() * H : H + 120;
+    this.rx = 90 + Math.random() * 160;   /* ellipse half-width */
+    this.ry = 50 + Math.random() * 90;    /* ellipse half-height */
+    this.vx = (Math.random() - 0.5) * 0.28;
+    this.vy = -(Math.random() * 0.18 + 0.04);
+    this.maxAlpha = 0.045 + Math.random() * 0.055; /* very low — atmospheric */
+    this.alpha = init ? Math.random() * this.maxAlpha : 0;
+    this.fadeIn = true;
+    this.life = 0;
+    this.maxLife = 400 + Math.random() * 300;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleAmp = (Math.random() - 0.5) * 0.18;
+    this.tint = Math.random() > 0.5 ? '180,240,255' : '140,230,240';
+  }
+  update() {
+    this.life++;
+    this.wobble += 0.008;
+    this.x += this.vx + Math.sin(this.wobble) * this.wobbleAmp;
+    this.y += this.vy;
+    if (this.fadeIn) {
+      this.alpha += 0.0008;
+      if (this.alpha >= this.maxAlpha) this.fadeIn = false;
+    }
+    if (this.life > this.maxLife * 0.65) this.alpha -= 0.0006;
+    if (this.x < -this.rx * 1.5) this.x = W + this.rx;
+    if (this.x > W + this.rx * 1.5) this.x = -this.rx;
+    if (this.life >= this.maxLife || this.alpha <= 0) this.spawn(false);
+  }
+  draw() {
+    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.rx);
+    grd.addColorStop(0,   `rgba(${this.tint},${this.alpha})`);
+    grd.addColorStop(0.45,`rgba(${this.tint},${this.alpha * 0.55})`);
+    grd.addColorStop(1,   `rgba(${this.tint},0)`);
+    ctx.save();
+    ctx.scale(1, this.ry / this.rx);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y * (this.rx / this.ry), this.rx, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* Tiny fine droplet sparkles drifting upward */
+class Droplet {
+  constructor(init) { this.spawn(init); }
+  spawn(init) {
+    this.x = Math.random() * W;
+    this.y = init ? Math.random() * H : H + 10;
+    this.r = 0.8 + Math.random() * 1.6;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = -(Math.random() * 0.5 + 0.15);
+    this.alpha = 0;
+    this.maxAlpha = 0.12 + Math.random() * 0.1;
+    this.life = 0;
+    this.maxLife = 180 + Math.random() * 200;
+  }
+  update() {
+    this.life++;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.life < 30) this.alpha = Math.min(this.alpha + 0.005, this.maxAlpha);
+    else if (this.life > this.maxLife * 0.7) this.alpha -= 0.003;
+    if (this.life >= this.maxLife || this.alpha <= 0) this.spawn(false);
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,248,255,${this.alpha})`;
+    ctx.fill();
+  }
+}
+
+function initClouds() {
+  clouds = [];
+  droplets = [];
+  for (let i = 0; i < 22; i++) clouds.push(new MistCloud(true));
+  for (let i = 0; i < 55; i++) droplets.push(new Droplet(true));
+}
+initClouds();
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  clouds.forEach(c => { c.update(); c.draw(); });
+  droplets.forEach(d => { d.update(); d.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ── RATING BUTTONS ── */
+document.querySelectorAll('.rating-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('rating-val').value = btn.dataset.val;
+  });
+});
+
+/* ── FORM SUBMIT ── */
+const form = document.getElementById('feedback-form');
+const successBox = document.getElementById('form-success');
+const submitBtn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending…';
+
+  const formData = new FormData(form);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      form.style.display = 'none';
+      successBox.style.display = 'block';
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Feedback →';
+      alert('Something went wrong. Please try again.');
+    }
+  } catch {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send Feedback →';
+    alert('Network error. Please check your connection.');
+  }
+});
+
+/* ── SCROLL REVEAL ── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.why-card, .stat-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

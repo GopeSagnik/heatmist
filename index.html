@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Mist | Coming Soon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            /* Deep dark blue/teal gradient */
+            background: linear-gradient(135deg, #0a1128 0%, #162447 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Full Width Pipe System */
+        .pipe-system {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 900px; /* Constrains width on ultrawide screens */
+            z-index: 10;
+        }
+
+        /* The Horizontal Pipe */
+        .pipe {
+            width: 100%;
+            height: 12px;
+            background: #455a64;
+            box-shadow: inset 0 -4px 6px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Container holding the nozzles */
+        .nozzles-wrapper {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 0 5%;
+        }
+
+        /* Individual Nozzle Assembly */
+        .nozzle-assembly {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .nozzle-top {
+            width: 30px;
+            height: 15px;
+            background: #78909c;
+            border-radius: 0 0 4px 4px;
+            box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5);
+        }
+
+        .nozzle-tip {
+            width: 12px;
+            height: 8px;
+            background: #546e7a;
+            border-radius: 0 0 3px 3px;
+        }
+
+        .mist-container {
+            position: absolute;
+            top: 23px; /* Starts right below the tip */
+            width: 200px;
+            height: 600px;
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        /* Mist Particles */
+        .particle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            background: rgba(255, 255, 255, 0.6); 
+            border-radius: 50%;
+            filter: blur(8px);
+            pointer-events: none;
+            transform: translateX(-50%);
+        }
+
+        /* Main Content Styling - Dark Glassmorphism */
+        .content {
+            z-index: 20;
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 90%;
+            margin-top: 80px; /* Adjusted to account for the pipe */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #00e5ff; 
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #80deea;
+            margin-bottom: 25px;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: #b0bec5;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* New Prominent Coming Soon Styling */
+        .coming-soon {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.7), 0 0 40px rgba(0, 229, 255, 0.3);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Pulsing effect for the coming soon text */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(0, 229, 255, 0.7), 0 0 40px rgba(0, 229, 255, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 30px rgba(0, 229, 255, 1), 0 0 50px rgba(0, 229, 255, 0.5);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .content {
+                padding: 30px;
+            }
+            .logo {
+                font-size: 2.2rem;
+            }
+            .tagline {
+                font-size: 1rem;
+            }
+            .coming-soon {
+                font-size: 2rem;
+            }
+            /* Adjust nozzle spacing for smaller screens */
+            .nozzles-wrapper {
+                padding: 0 2%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Multi-Nozzle Mist System -->
+    <div class="pipe-system">
+        <div class="pipe"></div>
+        <div class="nozzles-wrapper">
+            <!-- Nozzle 1 (Left) -->
+            <div class="nozzle-assembly">
+                <div class="nozzle-top"></div>
+                <div class="nozzle-tip"></div>
+                <div class="mist-container"></div>
+            </div>
+            
+            <!-- Nozzle 2 (Center) -->
+            <div class="nozzle-assembly">
+                <div class="nozzle-top"></div>
+                <div class="nozzle-tip"></div>
+                <div class="mist-container"></div>
+            </div>
+
+            <!-- Nozzle 3 (Right) -->
+            <div class="nozzle-assembly">
+                <div class="nozzle-top"></div>
+                <div class="nozzle-tip"></div>
+                <div class="mist-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="logo">Heat Mist</div>
+        <div class="tagline">Cooling Kolkata, One Drop at a Time.</div>
+        <p class="description">
+            Beat the sweltering heat with our refreshing mist sprayers! We are bringing instant relaxation and cooling to bus stands and roads across the Kolkata region. Our systems are designed to drop the temperature and bring a smile to your face.
+        </p>
+        
+        <!-- Updated Coming Soon Banner -->
+        <div class="coming-soon">
+            Coming Soon!
+        </div>
+    </div>
+
+    <!-- Script for Generating Mist Animation -->
+    <script>
+        // Select all mist containers (one for each nozzle)
+        const mistContainers = document.querySelectorAll('.mist-container');
+
+        function createMistParticle(container) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Randomize particle properties for a natural spray effect
+            const size = Math.random() * 15 + 10; 
+            const spreadX = (Math.random() - 0.5) * 140; // Slightly wider horizontal drift
+            const duration = Math.random() * 2.5 + 2; 
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Generate a random keyframe animation for this specific particle
+            const animName = `spray-${Math.random().toString(36).substr(2, 9)}`;
+            
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes ${animName} {
+                    0% {
+                        transform: translate(-50%, 0) scale(1);
+                        opacity: 0.7;
+                    }
+                    40% {
+                        opacity: 0.4;
+                    }
+                    100% {
+                        transform: translate(calc(-50% + ${spreadX}px), 500px) scale(${Math.random() * 4 + 3});
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            particle.style.animation = `${animName} ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+            
+            container.appendChild(particle);
+            
+            // Clean up DOM and styles after animation finishes
+            setTimeout(() => {
+                particle.remove();
+                style.remove();
+            }, duration * 1000);
+        }
+
+        // Generate particles continuously for ALL nozzles
+        setInterval(() => {
+            mistContainers.forEach(container => {
+                createMistParticle(container);
+            });
+        }, 45); // Set to 45ms to ensure smooth performance with 3 active nozzles
+    </script>
+</body>
+</html>
