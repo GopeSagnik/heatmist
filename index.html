@@ -21,10 +21,21 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Prevents scrolling when mist goes off-screen */
+            overflow: hidden;
             text-align: center;
             position: relative;
-            touch-action: none; /* Prevents mobile swipe-to-refresh glitching */
+            touch-action: none;
+        }
+
+        /* --- NEW: High-Performance Canvas --- */
+        #mist-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5; /* Stays behind content, but over background */
+            pointer-events: none; /* Lets clicks pass through */
         }
 
         /* Full Width Pipe System */
@@ -38,7 +49,6 @@
             z-index: 10;
         }
 
-        /* The Horizontal Pipe */
         .pipe {
             width: 100%;
             height: 12px;
@@ -46,7 +56,6 @@
             box-shadow: inset 0 -4px 6px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        /* Container holding the nozzles */
         .nozzles-wrapper {
             display: flex;
             justify-content: space-around;
@@ -54,12 +63,10 @@
             padding: 0 5%;
         }
 
-        /* Individual Nozzle Assembly */
         .nozzle-assembly {
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
         }
 
         .nozzle-top {
@@ -75,28 +82,6 @@
             height: 8px;
             background: #546e7a;
             border-radius: 0 0 3px 3px;
-        }
-
-        .mist-container {
-            position: absolute;
-            top: 23px;
-            width: 200px;
-            height: 600px;
-            overflow: visible;
-            pointer-events: none;
-        }
-
-        /* Mist Particles Base */
-        .particle {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            background: rgba(255, 255, 255, 0.6); 
-            border-radius: 50%;
-            filter: blur(8px);
-            pointer-events: none;
-            /* Remove CSS animations, handled by JS now */
-            will-change: transform, opacity; /* Warns the mobile browser to optimize this element */
         }
 
         /* Main Content Styling */
@@ -160,11 +145,10 @@
             }
         }
 
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             .content {
                 padding: 30px;
-                margin-top: 120px; /* Push content down slightly on phones to avoid mist overlap blocking text */
+                margin-top: 120px; 
             }
             .logo {
                 font-size: 2.2rem;
@@ -183,24 +167,14 @@
 </head>
 <body>
 
+    <canvas id="mist-canvas"></canvas>
+
     <div class="pipe-system">
         <div class="pipe"></div>
         <div class="nozzles-wrapper">
-            <div class="nozzle-assembly">
-                <div class="nozzle-top"></div>
-                <div class="nozzle-tip"></div>
-                <div class="mist-container"></div>
-            </div>
-            <div class="nozzle-assembly">
-                <div class="nozzle-top"></div>
-                <div class="nozzle-tip"></div>
-                <div class="mist-container"></div>
-            </div>
-            <div class="nozzle-assembly">
-                <div class="nozzle-top"></div>
-                <div class="nozzle-tip"></div>
-                <div class="mist-container"></div>
-            </div>
+            <div class="nozzle-assembly"><div class="nozzle-top"></div><div class="nozzle-tip nozzle-target"></div></div>
+            <div class="nozzle-assembly"><div class="nozzle-top"></div><div class="nozzle-tip nozzle-target"></div></div>
+            <div class="nozzle-assembly"><div class="nozzle-top"></div><div class="nozzle-tip nozzle-target"></div></div>
         </div>
     </div>
 
@@ -216,49 +190,113 @@
     </div>
 
     <script>
-        const mistContainers = document.querySelectorAll('.mist-container');
+        const canvas = document.getElementById('mist-canvas');
+        const ctx = canvas.getContext('2d', { alpha: true }); // Optimized context
+        
+        let width, height;
+        let particles = [];
+        let nozzlePositions = [];
+        const nozzles = document.querySelectorAll('.nozzle-target');
 
-        function createMistParticle(container) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
-            
-            // Randomize properties
-            const size = Math.random() * 15 + 10; 
-            const spreadX = (Math.random() - 0.5) * 140; 
-            const duration = (Math.random() * 2.5 + 2) * 1000; // Converted to milliseconds
-            const finalScale = Math.random() * 4 + 3;
-            
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            
-            container.appendChild(particle);
+        // Pre-render a perfect blurry mist drop (Sprite trick for massive performance gain)
+        const dropCanvas = document.createElement('canvas');
+        dropCanvas.width = 60;
+        dropCanvas.height = 60;
+        const dropCtx = dropCanvas.getContext('2d');
+        const gradient = dropCtx.createRadialGradient(30, 30, 0, 30, 30, 30);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)'); // Inner bright
+        gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)'); // Soft edge
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // Transparent outside
+        dropCtx.fillStyle = gradient;
+        dropCtx.fillRect(0, 0, 60, 60);
 
-            // Use the Web Animations API for smooth, hardware-accelerated mobile performance
-            const animation = particle.animate([
-                { transform: 'translate(-50%, 0) scale(1)', opacity: 0.7, offset: 0 },
-                { opacity: 0.4, offset: 0.4 },
-                { transform: `translate(calc(-50% + ${spreadX}px), 500px) scale(${finalScale})`, opacity: 0, offset: 1 }
-            ], {
-                duration: duration,
-                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-                fill: 'forwards'
-            });
-
-            // Clean up the DOM element smoothly when the animation finishes
-            animation.onfinish = () => {
-                particle.remove();
-            };
+        // Setup canvas size
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            updateNozzlePositions();
         }
 
-        // Reduced spawn rate slightly (from 45ms to 60ms) to ensure butter-smooth frame rates on older phones
-        setInterval(() => {
-            // Check if page is hidden to save battery/processor when user switches tabs
-            if (!document.hidden) { 
-                mistContainers.forEach(container => {
-                    createMistParticle(container);
+        // Find exactly where the 3 CSS nozzles are on the screen
+        function updateNozzlePositions() {
+            nozzlePositions = [];
+            nozzles.forEach(nozzle => {
+                const rect = nozzle.getBoundingClientRect();
+                // Get the center bottom of each nozzle tip
+                nozzlePositions.push({
+                    x: rect.left + (rect.width / 2),
+                    y: rect.bottom
+                });
+            });
+        }
+
+        // Particle Class
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 20 + 10;
+                // Random drift left/right, consistent gravity down
+                this.speedX = (Math.random() - 0.5) * 1.5; 
+                this.speedY = Math.random() * 2 + 1.5; 
+                this.opacity = Math.random() * 0.5 + 0.5;
+                this.growth = Math.random() * 0.2 + 0.1;
+                this.life = 0;
+                this.maxLife = Math.random() * 150 + 100; // How many frames it lives
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.size += this.growth;
+                this.life++;
+                
+                // Fade out as it dies
+                this.opacity = Math.max(0, 1 - (this.life / this.maxLife));
+            }
+
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                // Draw our pre-rendered blurry sprite perfectly centered
+                ctx.drawImage(dropCanvas, this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+            }
+        }
+
+        // Main Animation Loop
+        function animate() {
+            ctx.clearRect(0, 0, width, height); // Clear screen
+
+            // Add new particles if the tab is active
+            if (!document.hidden) {
+                nozzlePositions.forEach(pos => {
+                    // Spawn 1 particle per nozzle per frame
+                    particles.push(new Particle(pos.x, pos.y));
                 });
             }
-        }, 60); 
+
+            // Update and draw existing particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Remove dead particles or particles that fell off screen
+                if (particles[i].life >= particles[i].maxLife || particles[i].y > height) {
+                    particles.splice(i, 1);
+                    i--; // Adjust index after removal
+                }
+            }
+
+            ctx.globalAlpha = 1; // Reset alpha
+            requestAnimationFrame(animate); // Call next frame
+        }
+
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animate(); // Start the engine
+
     </script>
 </body>
 </html>
