@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KoolCity | Coming Soon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a1128 0%, #162447 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            touch-action: none;
+        }
+
+        /* --- NEW: High-Performance Canvas --- */
+        #mist-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5; /* Stays behind content, but over background */
+            pointer-events: none; /* Lets clicks pass through */
+        }
+
+        /* Full Width Pipe System */
+        .pipe-system {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 900px;
+            z-index: 10;
+        }
+
+        .pipe {
+            width: 100%;
+            height: 12px;
+            background: #455a64;
+            box-shadow: inset 0 -4px 6px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .nozzles-wrapper {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 0 5%;
+        }
+
+        .nozzle-assembly {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nozzle-top {
+            width: 30px;
+            height: 15px;
+            background: #78909c;
+            border-radius: 0 0 4px 4px;
+            box-shadow: inset 0 -3px 5px rgba(0,0,0,0.5);
+        }
+
+        .nozzle-tip {
+            width: 12px;
+            height: 8px;
+            background: #546e7a;
+            border-radius: 0 0 3px 3px;
+        }
+
+        /* Main Content Styling */
+        .content {
+            z-index: 20;
+            background: rgba(15, 25, 45, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 90%;
+            margin-top: 80px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #00e5ff; 
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #80deea;
+            margin-bottom: 25px;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: #b0bec5;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .coming-soon {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.7), 0 0 40px rgba(0, 229, 255, 0.3);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(0, 229, 255, 0.7), 0 0 40px rgba(0, 229, 255, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 30px rgba(0, 229, 255, 1), 0 0 50px rgba(0, 229, 255, 0.5);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 30px;
+                margin-top: 120px; 
+            }
+            .logo {
+                font-size: 2.2rem;
+            }
+            .tagline {
+                font-size: 1rem;
+            }
+            .coming-soon {
+                font-size: 2rem;
+            }
+            .nozzles-wrapper {
+                padding: 0 2%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="mist-canvas"></canvas>
+
+    <div class="pipe-system">
+        <div class="pipe"></div>
+        <div class="nozzles-wrapper">
+            <div class="nozzle-assembly"><div class="nozzle-top"></div><div class="nozzle-tip nozzle-target"></div></div>
+            <div class="nozzle-assembly"><div class="nozzle-top"></div><div class="nozzle-tip nozzle-target"></div></div>
+            <div class="nozzle-assembly"><div class="nozzle-top"></div><div class="nozzle-tip nozzle-target"></div></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="logo">Kool City</div>
+        <div class="tagline">Cooling Kolkata, One Drop at a Time.</div>
+        <p class="description">
+            Beat the sweltering heat with our refreshing mist sprayers! We are bringing instant relaxation and cooling to bus stands and roads across the Kolkata region. Our systems are designed to drop the temperature and bring a smile to your face.
+        </p>
+        <div class="coming-soon">
+            Coming Soon!
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mist-canvas');
+        const ctx = canvas.getContext('2d', { alpha: true }); // Optimized context
+        
+        let width, height;
+        let particles = [];
+        let nozzlePositions = [];
+        const nozzles = document.querySelectorAll('.nozzle-target');
+
+        // Pre-render a perfect blurry mist drop (Sprite trick for massive performance gain)
+        const dropCanvas = document.createElement('canvas');
+        dropCanvas.width = 60;
+        dropCanvas.height = 60;
+        const dropCtx = dropCanvas.getContext('2d');
+        const gradient = dropCtx.createRadialGradient(30, 30, 0, 30, 30, 30);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)'); // Inner bright
+        gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)'); // Soft edge
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // Transparent outside
+        dropCtx.fillStyle = gradient;
+        dropCtx.fillRect(0, 0, 60, 60);
+
+        // Setup canvas size
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            updateNozzlePositions();
+        }
+
+        // Find exactly where the 3 CSS nozzles are on the screen
+        function updateNozzlePositions() {
+            nozzlePositions = [];
+            nozzles.forEach(nozzle => {
+                const rect = nozzle.getBoundingClientRect();
+                // Get the center bottom of each nozzle tip
+                nozzlePositions.push({
+                    x: rect.left + (rect.width / 2),
+                    y: rect.bottom
+                });
+            });
+        }
+
+        // Particle Class
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 20 + 10;
+                // Random drift left/right, consistent gravity down
+                this.speedX = (Math.random() - 0.5) * 1.5; 
+                this.speedY = Math.random() * 2 + 1.5; 
+                this.opacity = Math.random() * 0.5 + 0.5;
+                this.growth = Math.random() * 0.2 + 0.1;
+                this.life = 0;
+                this.maxLife = Math.random() * 150 + 100; // How many frames it lives
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.size += this.growth;
+                this.life++;
+                
+                // Fade out as it dies
+                this.opacity = Math.max(0, 1 - (this.life / this.maxLife));
+            }
+
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                // Draw our pre-rendered blurry sprite perfectly centered
+                ctx.drawImage(dropCanvas, this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+            }
+        }
+
+        // Main Animation Loop
+        function animate() {
+            ctx.clearRect(0, 0, width, height); // Clear screen
+
+            // Add new particles if the tab is active
+            if (!document.hidden) {
+                nozzlePositions.forEach(pos => {
+                    // Spawn 1 particle per nozzle per frame
+                    particles.push(new Particle(pos.x, pos.y));
+                });
+            }
+
+            // Update and draw existing particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Remove dead particles or particles that fell off screen
+                if (particles[i].life >= particles[i].maxLife || particles[i].y > height) {
+                    particles.splice(i, 1);
+                    i--; // Adjust index after removal
+                }
+            }
+
+            ctx.globalAlpha = 1; // Reset alpha
+            requestAnimationFrame(animate); // Call next frame
+        }
+
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animate(); // Start the engine
+
+    </script>
+</body>
+</html>
